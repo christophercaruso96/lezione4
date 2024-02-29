@@ -1,0 +1,36 @@
+Analisi Flusso (Layer 2-3 stack ISO/OSI)
+
+-------------------------------------------------------------
+
+Client "Laptop-PT Laptop0" ip: 192.168.100.100/24 invia ping al client "PC-PT PC0" ip: 192.168.100.103/24
+
+I due client sono all'interno della stessa LAN, l'invio del pacchetto è soggetto alle seguenti operazioni:
+
+1) ARP Request in broadcast nella propria rete LAN effettuata da "Laptop-PT Laptop0"
+2) ARP Reply dal dispositivo destinatario ("PC-PT PC0") contenente l'indirizzo MAC associato all'IP richiesto
+3) Il dispositivo mittente ("Laptop-PT Laptop0") popola la propria ARP Table/ARP Cache con la coppia IP/MAC
+4) Il pacchetto del ping viene instradato direttamente su Layer 2 senza passare dal gateway
+5) Il dispositivo destinatario ("PC-PT PC0") invia una risposta al ping ricevuto a "Laptop-PT Laptop0" nello stesso modo sempre sul Layer 2
+
+-------------------------------------------------------------
+
+Client "Laptop-PT Laptop0" ip: 192.168.100.100/24 invia ping al client "Laptop-PT Laptop2" ip: 192.168.200.100/24
+
+
+I due client sono all'interno di diverse LAN, l'invio del pacchetto è soggetto alle seguenti operazioni:
+
+1) ARP Request in broadcast nella propria rete LAN effettuata da "Laptop-PT Laptop0"
+2) ARP Reply dal gateway contenente il proprio indirizzo MAC
+3) Il dispositivo mittente ("Laptop-PT Laptop0") popola la propria ARP Table/ARP Cache associando a quell'ip l'indirizzo MAC del gateway
+4) Il pacchetto del ping viene instradato verso il gateway e qui entra in gioco il Layer 3
+5) Il gateway legge il pacchetto IP del Layer 3 ed individua SRC IP e DST IP
+6) Viene rieffettuato un salto nel Layer 2 nella rete LAN del destinatario e il gateway individua il MAC Address corrispondente al "DST IP" ricevuto
+7) Il pacchetto del ping viene instradato, su Layer 2, verso il dispositivo "Laptop-PT Laptop2" 
+5) Il dispositivo destinatario ("Laptop-PT Laptop2") invia una risposta al ping ricevuto a "Laptop-PT Laptop0" nello stesso modo.
+
+-------------------------------------------------------------
+
+Note Importanti: 
+A) una volta popolata la tabella ARP i passaggi di ARP Request e ARP Reply vengono saltati finchè la ARP Cache non viene ripulita dalla coppia MAC/IP interessata dal traffico in esame. I pacchetti vengono quindi direttamente instradati su Layer 2 conoscendo già il MAC Address associato.
+B) I salti tra layer 2 e layer 3 avvengono ad ogni passaggio tra LAN diverse a ridosso del gateway.
+C) Se gli switch usati lavorano sul layer 3 possono occuparsi anche loro stessi del routing.
