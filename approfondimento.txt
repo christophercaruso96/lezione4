@@ -1,0 +1,36 @@
+Schema di rete creato per approfondire ulteriori concetti della lezione 4.
+
+Ho approfondito nello schema di rete i seguenti concetti:
+
+1) Funzionamento del livello di trasporto (layer 4)
+2) configurazione VLAN (per comodità ho creato due VLAN che corrispondono a due LAN con CIDR /24 distinte, si possono usare le VLAN mantenendo un solo gateway a livello di routing segmentando le subnet).
+3) Implementazione server DHCP, DNS, HTTPS
+
+Layer 4
+
+Interrogando da browser sul dispositivo "pc01" l'url http:internalsite sono state generate due richieste: 1 DNS, 1 HTTP.
+
+Ho constatato il funzionamento del protocollo UDP con la richiesta DNS da "pc01" a "srvdc01".
+Ho constato il funzionamento del protocollo TCP con la risposta da srvweb01 che ha inoltrato su richiesta il contenuto della pagina web a "pc01". Ho verificato i flag contenuti nei pacchetti TCP durante lo scambio come indicato a lezione.
+
+Curiosità: nella simulazione, da quello che ho notato, in questo caso il track passa direttamente da livello 4 a livello 7 senza "toccare" i layer intermediari di sessione e presentazione. 
+
+
+VLAN
+
+Ho creato una VLAN 5 dedicata all'ambiente produzione e una VLAN 10 dedicata all'ambiente di laboratorio.
+In questo caso le due VLAN configurate nel layer 2 degli switch, corrispondono nel layer 3 del gateway a 2 LAN distinte in /24 (192.168.1.0/24 e 10.0.1.0/24). 
+Avrei potuto anche segmentare una singola subnet (e.g. /25 range 192.168.1.1-192.168.1.126 e 192.168.1.129-192.168.1.254). 
+
+Per settare le VLAN con routing attivo è stato necessario:
+- layer 2 settare le porte in trunk tra gli switch e in access verso gli endpoint
+- layer 3 configurare il router con i tag Dot1Q (serve usare la CLI per vedere le interfacce e le VLAN in completezza. Comandi "show ip interface brief" e "show vlan". Da interfaccia grafica non è visibile questo tipo di configurazione, si può solo consultare il database VLAN).
+
+
+Ho verificato e sono riuscito ad isolare correttamente le due VLAN che arrivano al gateway, sono segmentate dallo stesso core switch ma non comunicano tra loro.
+
+
+DHCP, DNS, HTTP
+
+In ogni VLAN ho creato almeno un server che esponga i 3 servizi e ho creato a tale scopo anche dei record DNS sui rispettivi server. Ho configurato il pool DHCP con reservation dei primi 50 indirizzi + indirizzi non presenti nei pool creati.
+Per i server e gli apparati di rete, ovviamente, è settato un IP statico.
